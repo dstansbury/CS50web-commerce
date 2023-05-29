@@ -9,14 +9,16 @@
                 <th>Title</th>
                 <th>Description</th>
                 <th>Current Price</th>
+                <th>Listed By</th>
             </tr>
         </thead>
         {% for listing in listings %}
-            <tr onclick="window.location='listing/{{ listing.listingID }}'">
+            <tr onclick="window.location= '{% url 'listing' listingID=listing.listingID %}'">
                 <td><img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:200px"></td>
                 <td>{{ listing.title }}</td>
                 <td>{{ listing.description }}</td>
                 <td>{{ listing.currentPrice }}</td>
+                <td>{{ listing.listedBy }} </td>
             </tr>
         {% endfor %}
     </table>

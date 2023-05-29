@@ -1,5 +1,25 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Listings in {{ category }} category</h2>
+    <h2>{{ category|capfirst }}</h2>
+    <table class = "table table-hover table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Current Price</th>
+                <th>Listed By</th>
+            </tr>
+        </thead>
+        {% for listing in listingsInCategory %}
+            <tr onclick="window.location='{% url 'listing' listingID=listing.listingID %}'">
+                <td><img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:200px"></td>
+                <td>{{ listing.title }}</td>
+                <td>{{ listing.description }}</td>
+                <td>{{ listing.currentPrice }}</td>
+                <td>{{ listing.listedBy }} </td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

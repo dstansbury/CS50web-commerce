@@ -3,16 +3,29 @@
 
 {% block body %}
     <h2>{{ listing.title }} </h2>
+    <p> Add to watch list </p>
     <div>
         <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
     </div>
     <div>
-        <h3>Description</h3>
+        <p><strong>Current high bid</strong>: {{ listing.currentPrice }} </p>
+    </div>
+<!-- hides the ability to bid if the user is not logged in -->
+    {% if user.is_authenticated %}
+    <div>
+        <p> Bid form</p>
+    </div>
+    {% endif %}
+    <br>
+    <div>
+        <h3>Details</h3>
         <p>{{ listing.description }}</p>
+        <p><strong>Listed by:</strong>  {{ listing.listedBy }} </p>
+        <p><strong>Listed at:</strong> {{ listing.listedTime }} </p>
+        <p><strong>Category:</strong> {{ listing.category }} </p>
     </div>
     <div>
         <h3>Bid History</h3>
-        <p>Current Highest Bid: {{ listing.currentPrice }}</p>
         <table class = "table table-hover table-bordered">
             <thead class="thead-dark">
                 <tr>

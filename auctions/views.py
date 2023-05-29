@@ -76,7 +76,7 @@ def listing(request, listingID):
     })
 
 def create(request):
-    pass
+    return render(request, "auctions/create.html")
 
 """
 Only accessible if the user is logged in.
@@ -94,15 +94,20 @@ def watchlist(request):
         })
 
 """
-Table view of all the categories
+List view of all the categories, sorted alphabetically
 """
 def categories(request):
-    return render(request, "auctions/categories.html")
+    categories = Listings.objects.values_list('category', flat=True).distinct().order_by('category')
+    return render(request, "auctions/categories.html", {
+        "categories": categories
+    })
 
 """
 Table view of all the listings in a given category
 """
 def listingsInCategory(request, category):
+    listingsInCategory = Listings.objects.filter(category=category)
     return render(request, "auctions/listingsInCategory.html", {
-        "category": category.capitalize()
+        "category": category,
+        "listingsInCategory": listingsInCategory
     })

@@ -25,6 +25,7 @@ class Listings(models.Model):
     #blank = true so that the listing can have no watchers
     watchers = models.ManyToManyField(User, through='UserWatchList', blank = True, related_name="watchers")
     listedBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings", null=False, blank=False)
+    listedTime = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
 """
 Defines the watchlist table in the DB. It is many to many. 
