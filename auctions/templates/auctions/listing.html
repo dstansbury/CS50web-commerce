@@ -1,0 +1,53 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block body %}
+    <h2>{{ listing.title }} </h2>
+    <div>
+        <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
+    </div>
+    <div>
+        <h3>Description</h3>
+        <p>{{ listing.description }}</p>
+    </div>
+    <div>
+        <h3>Bid History</h3>
+        <p>Current Highest Bid: {{ listing.currentPrice }}</p>
+        <table class = "table table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Bid</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            {% for bid in bids %}
+                <tr>
+                    <td>{{ bid.userID }} </td>
+                    <td>{{ bid.bidValue }}</td>
+                    <td>{{ bid.bidTime }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div>
+        <h3>Comments</h3>
+        <table class = "table table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Comment</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            {% for comment in comments %}
+                <tr>
+                    <td>{{ comment.userID }} </td>
+                    <td>{{ comment.comment }}</td>
+                    <td>{{ comment.commentTime }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+{% endblock %}
