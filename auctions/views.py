@@ -85,10 +85,19 @@ Only accessible if the user is logged in.
 Returns a table view of all that users watched items
 """
 def watchlist(request):
+    user = request.user
     # Check if authentication successful
-    if request.user.is_authenticated:
+    if user.is_authenticated:
+        userWatchList = user.watchList.all()
+        titles = []
+        descriptions = []
+        print(userWatchList)
+        for listing in userWatchList:
+            titles.append(listing.title)
+            descriptions.append(listing.description)
+            print(listing.listingID, listing.title, listing.description)
         return render(request, "auctions/watchlist.html", {
-            "watchlist": watchlist
+            "userWatchList": userWatchList
         })
     else:
         return render(request, "auctions/login.html", {
@@ -133,6 +142,8 @@ Table view of all the listings in a given category
 """
 def listingsInCategory(request, category):
     listingsInCategory = Listings.objects.filter(category=category)
+    for listing in listingsInCategory:
+        print(listing.listingID, listing.title, listing.description)
     return render(request, "auctions/listingsInCategory.html", {
         "category": category,
         "listingsInCategory": listingsInCategory
