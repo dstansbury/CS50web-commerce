@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from .models import User, Listings, UserWatchList, Bids, Comments
@@ -69,10 +69,12 @@ def listing(request, listingID):
     listing = Listings.objects.get(listingID=listingID)
     comments = Comments.objects.filter(listingID=listingID)
     bids = Bids.objects.filter(listingID=listingID)
+    is_watching = UserWatchList.objects.filter(userID=request.user, listingID=listing).exists() if request.user.is_authenticated else False
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "comments": comments,
-        "bids": bids
+        "bids": bids,
+        "is_watching": is_watching
     })
 
 def create(request):
@@ -93,6 +95,30 @@ def watchlist(request):
             "message": "Log in to be able to view your watchlist."
         })
 
+"""
+Adds an item to a user's watchlist if they are not watching it already.
+"""
+def add_to_watchlist(request):
+    if request.method == "POST":
+        listingID = request.POST["listingID"]
+        user = request.user
+
+        if user.is_authenticated and not user.watchList.filter(listingID=listingID).exists():
+            listing = Listings.objects.get(listingID=listingID)
+            UserWatchList.objects.create(userID=user, listingID=listing)
+
+    return redirect("listing", listingID=listingID)
+
+def remove_from_watchlist(request):
+    if request.method == "POST":
+        listingID = request.POST["listingID"]
+        user = request.user
+
+        if user.is_authenticated and user.watchList.filter(listingID=listingID).exists():
+            listing = Listings.objects.get(listingID = listingID)
+            UserWatchList.objects.filter(userID=user, listingID=listing).delete()
+            
+    return redirect("listing", listingID=listingID)
 """
 List view of all the categories, sorted alphabetically
 """
