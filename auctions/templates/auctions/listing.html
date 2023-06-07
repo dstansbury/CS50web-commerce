@@ -20,6 +20,7 @@
     {% else %}
         <p><a href="{% url 'login' %}">Log in</a> to add to watch list </p>
     {% endif %}
+    <br>
     <div>
         <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
     </div>
@@ -28,9 +29,14 @@
     </div>
 <!-- hides the ability to bid if the user is not logged in -->
     {% if user.is_authenticated %}
-    <div>
-        <p> Bid form</p>
-    </div>
+        <div>
+            <form method = "POST" action="{% url 'new_bid' listingID=listing.listingID %}">
+                {% csrf_token %}
+                <input class="form-control" type="number" step="0.01" name="newBid" placeholder="{{ lowestPossibleBid }}">
+                <br>
+                <button class="btn btn-primary" type="submit">Bid</button>
+            </form>
+        </div>
     {% endif %}
     <br>
     <div>
@@ -52,11 +58,16 @@
             </thead>
             {% for bid in bids %}
                 <tr>
-                    <td>{{ bid.userID }} </td>
+                    <td>{{ bid.bidder }} </td>
                     <td>{{ bid.bidValue }}</td>
                     <td>{{ bid.bidTime }}</td>
                 </tr>
             {% endfor %}
+                <tr>
+                    <td>{{ listing.listedBy }} </td>
+                    <td>{{ listing.startingBid }}</td>
+                    <td>{{ listing.listedTime }}</td>
+                </tr>
         </table>
     </div>
     <div>

@@ -3,6 +3,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.utils import timezone
+from decimal import Decimal
 
 from .models import User, Listings, UserWatchList, Bids, Comments
 
@@ -70,11 +72,13 @@ def listing(request, listingID):
     comments = Comments.objects.filter(listingID=listingID)
     bids = Bids.objects.filter(listingID=listingID)
     is_watching = UserWatchList.objects.filter(userID=request.user, listingID=listing).exists() if request.user.is_authenticated else False
+    lowestPossibleBid = listing.currentPrice + Decimal('0.01')
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "comments": comments,
         "bids": bids,
-        "is_watching": is_watching
+        "is_watching": is_watching,
+        "lowestPossibleBid": lowestPossibleBid
     })
 
 def create(request):
@@ -148,3 +152,26 @@ def listingsInCategory(request, category):
         "category": category,
         "listingsInCategory": listingsInCategory
     })
+
+"""
+Allows a new bid to be posted into the database.
+"""
+def new_bid(request, listingID):
+    if request.method == "POST":
+        new_bid = Decimal(request.POST["newBid"])
+        listing = Listings.objects.get(listingID=listingID)
+
+        # Update the currentPrice of the listing if the new bid is higher
+        if new_bid > listing.currentPrice:
+            listing.currentPrice = new_bid
+            listing.save()
+
+            # Create a new Bid object and save it to the database
+            bid = Bids(listingID=listing, bidValue=new_bid, bidTime=timezone.now())
+            bid.save()
+        
+        # If the new bid is lower, display an error message
+        #else:
+         #   bid_error_message = "New bids must exceed the current highest bid."
+
+    return redirect("listing", listingID=listingID)

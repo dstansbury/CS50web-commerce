@@ -45,6 +45,7 @@ class Bids(models.Model):
     listingID= models.ForeignKey(Listings, on_delete=models.CASCADE, related_name="listingBids")
     bidValue = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
     bidTime = models.DateTimeField(auto_now_add=True, null=False, blank=False)
+    bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
 
 """
 Defines the comments table in the DB. It is a one to many relationship. 
