@@ -3,6 +3,7 @@
 
 {% block body %}
     <h2>{{ listing.title }} </h2>
+    <p><strong>Category:</strong> {{ listing.category }} </p>
     {% if user.is_authenticated %}
         {% if not is_watching %}
             <form method="POST" action="{% url 'add_to_watchlist' %}">
@@ -25,11 +26,20 @@
         <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
     </div>
     <div>
-        <p><strong>Current high bid</strong>: {{ listing.currentPrice }} </p>
+        <p><strong>Starting price</strong>: {{ listing.startingBid }} </p>
+        <p><strong>Current high bid</strong>: 
+            {% if listing.currentPrice %}
+                {{ listing.currentPrice }} </p>
+            {% else %}
+                No bids</p>
+            {% endif %}
     </div>
 <!-- hides the ability to bid if the user is not logged in -->
     {% if user.is_authenticated %}
         <div>
+            {% if error_message != None %}
+                <p class="text-danger">{{ error_message }}</p>
+            {% endif %}
             <form method = "POST" action="{% url 'new_bid' listingID=listing.listingID %}">
                 {% csrf_token %}
                 <input class="form-control" type="number" step="0.01" name="newBid" placeholder="{{ lowestPossibleBid }}">
@@ -40,14 +50,15 @@
     {% endif %}
     <br>
     <div>
+<!-- Displays detail of the listing -->
         <h3>Details</h3>
         <p>{{ listing.description }}</p>
-        <p><strong>Listed by:</strong>  {{ listing.listedBy }} </p>
-        <p><strong>Listed at:</strong> {{ listing.listedTime }} </p>
-        <p><strong>Category:</strong> {{ listing.category }} </p>
+        <p><strong>Listed by:</strong>  {{ listing.listedBy }} on {{ listing.listedTime }} </p>
+        
     </div>
     <div>
         <h3>Bid History</h3>
+        {% if bids %}
         <table class = "table table-hover table-bordered">
             <thead class="thead-dark">
                 <tr>
@@ -63,12 +74,11 @@
                     <td>{{ bid.bidTime }}</td>
                 </tr>
             {% endfor %}
-                <tr>
-                    <td>{{ listing.listedBy }} </td>
-                    <td>{{ listing.startingBid }}</td>
-                    <td>{{ listing.listedTime }}</td>
-                </tr>
         </table>
+            
+        {% else %}
+            <p>No bids</p>
+        {% endif %}
     </div>
     <div>
         <h3>Comments</h3>

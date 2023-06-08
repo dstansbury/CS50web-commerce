@@ -17,7 +17,7 @@ class Listings(models.Model):
     title = models.CharField(max_length=64, null=False, blank=False)
     description = models.CharField(max_length=256, null=False, blank=False)
     startingBid = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
-    currentPrice = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
+    currentPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     #intention with the null=True is to allow for a null entry in the DB
     #intention with blank=True is to allow for a blank field in the form
     category = models.CharField(max_length=64, null=True, blank=True)
