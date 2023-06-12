@@ -3,7 +3,7 @@
 
 {% block body %}
     <h2>{{ listing.title }} </h2>
-    <p><strong>Category:</strong> {{ listing.category }} </p>
+    <p><strong>Category:</strong><a href="{% url 'listingsInCategory' listing.category %}"> {{ listing.category }} </a>  </p>
     {% if user.is_authenticated %}
         {% if not is_watching %}
             <form method="POST" action="{% url 'add_to_watchlist' %}">
