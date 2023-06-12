@@ -198,3 +198,24 @@ def new_bid(request, listingID):
                 request.session['bid_error_message'] = "Initial bids must be at least as much as the starting price."
         
         return redirect("listing", listingID=listingID)
+    
+"""
+Enables authenticated users to post a comment
+"""
+def new_comment(request, listingID):
+    comment_error_message = None
+    if request.method == "POST":
+        print(request.POST)
+        new_comment = request.POST["new_comment"]
+        listing = Listings.objects.get(listingID=listingID)
+        comments = Comments.objects.filter(listingID=listingID)
+
+        # check if the same comment has been made previously to prevent multiple spams of the same comment
+        if new_comment in comments:
+            request.session['comment_error_message'] = "New comments cannot be identical to previously entered comments, to prevent spam."
+
+        else:
+            comment = Comments(listingID=listing, comment=new_comment, commentTime = timezone.now(), userID = request.user)
+            comment.save()
+        
+    return redirect("listing", listingID = listingID)

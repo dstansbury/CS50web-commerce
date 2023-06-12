@@ -98,6 +98,21 @@
                 </tr>
             {% endfor %}
         </table>
+    <!-- hides the ability to comment if the user is not logged in -->
+    {% if user.is_authenticated %}
+    <div>
+        {% if comment_error_message != None %}
+            <p class="text-danger">{{ comment_error_message }}</p>
+        {% endif %}
+        <form method = "POST" action="{% url 'new_comment' listingID=listing.listingID %}">
+            {% csrf_token %}
+            <input class="form-control" type="text" name="new_comment" placeholder="Enter your comment here">
+            <br>
+            <button class="btn btn-primary" type="submit">Add Comment</button>
+        </form>
     </div>
+{% endif %}
+    </div>
+
     
 {% endblock %}
