@@ -72,7 +72,9 @@ def listing(request, listingID):
     comments = Comments.objects.filter(listingID=listingID)
     bids = Bids.objects.filter(listingID=listingID)
     is_watching = UserWatchList.objects.filter(userID=request.user, listingID=listing).exists() if request.user.is_authenticated else False
-    error_message = request.GET.get("error_message")
+    #pops the bid_error_message off, so it is only shown on the relevant request, once.
+    bid_error_message = request.session.pop("bid_error_message", None)
+    
     if listing.currentPrice:
         lowestPossibleBid = listing.currentPrice + Decimal('0.01')
     else:
@@ -83,7 +85,7 @@ def listing(request, listingID):
         "bids": reversed(bids),
         "is_watching": is_watching,
         "lowestPossibleBid": lowestPossibleBid,
-        "error_message": error_message
+        "bid_error_message": bid_error_message
     })
 
 def create(request):
@@ -162,41 +164,37 @@ def listingsInCategory(request, category):
 Allows a new bid to be posted into the database.
 """
 def new_bid(request, listingID):
-    error_message = None
+    bid_error_message = None
     if request.method == "POST":
         new_bid = Decimal(request.POST["newBid"])
         listing = Listings.objects.get(listingID=listingID)
         bids = Bids.objects.filter(listingID=listingID)
-    # check if there are bids
-    if bids:
-        
-        # if yes, update the currentPrice of the listing if the new bid is higher
-        if new_bid > listing.currentPrice:
-            listing.currentPrice = new_bid
-            listing.save()
-            # Create a new Bid object and save it to the database
-            bid = Bids(listingID=listing, bidValue=new_bid, bidTime=timezone.now(), bidder=request.user)
-            bid.save()
-        
-        # If the new bid is lower, display an error message
-        else:
-            error_message = "New bids must exceed the current highest bid."
-    
-    else:
-        # if no bids, check the first bid exceeds the starting price
-        if new_bid >= listing.startingBid:
-            #if yes, update the current price and save the bid
-            listing.currentPrice = new_bid
-            listing.save()
-            bid = Bids(listingID=listing, bidValue=new_bid, bidTime=timezone.now(), bidder=request.user)
-            bid.save()
+        # check if there are bids
+        if bids:
+            
+            # if yes, update the currentPrice of the listing if the new bid is higher
+            if new_bid > listing.currentPrice:
+                listing.currentPrice = new_bid
+                listing.save()
+                # Create a new Bid object and save it to the database
+                bid = Bids(listingID=listing, bidValue=new_bid, bidTime=timezone.now(), bidder=request.user)
+                bid.save()
+            
+            # If the new bid is lower, display an error message. Stored in the session
+            else:
+                request.session['bid_error_message'] = "New bids must exceed the current highest bid."
         
         else:
-            # if no, display an error message
-            error_message = "Initial bids must be at least as much as the starting price."
-    
-    if error_message:
-        return HttpResponseRedirect(reverse("listing", args=(listingID,)) + f"?error_message={error_message}")
-    
-    else:
-        return HttpResponseRedirect(reverse("listing", args=(listingID,)))
+            # if no bids, check the first bid exceeds the starting price
+            if new_bid >= listing.startingBid:
+                #if yes, update the current price and save the bid
+                listing.currentPrice = new_bid
+                listing.save()
+                bid = Bids(listingID=listing, bidValue=new_bid, bidTime=timezone.now(), bidder=request.user)
+                bid.save()
+            
+            else:
+                # if no, display an error message
+                request.session['bid_error_message'] = "Initial bids must be at least as much as the starting price."
+        
+        return redirect("listing", listingID=listingID)

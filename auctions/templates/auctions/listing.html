@@ -37,8 +37,8 @@
 <!-- hides the ability to bid if the user is not logged in -->
     {% if user.is_authenticated %}
         <div>
-            {% if error_message != None %}
-                <p class="text-danger">{{ error_message }}</p>
+            {% if bid_error_message != None %}
+                <p class="text-danger">{{ bid_error_message }}</p>
             {% endif %}
             <form method = "POST" action="{% url 'new_bid' listingID=listing.listingID %}">
                 {% csrf_token %}
