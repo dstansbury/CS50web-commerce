@@ -74,6 +74,8 @@ def listing(request, listingID):
     is_watching = UserWatchList.objects.filter(userID=request.user, listingID=listing).exists() if request.user.is_authenticated else False
     #pops the bid_error_message off, so it is only shown on the relevant request, once.
     bid_error_message = request.session.pop("bid_error_message", None)
+    # pops the comment_error_message off, so it is only shown on the relevant request, once.
+    comment_error_message = request.session.pop("comment_error_message", None)
     
     if listing.currentPrice:
         lowestPossibleBid = listing.currentPrice + Decimal('0.01')
@@ -81,11 +83,13 @@ def listing(request, listingID):
         lowestPossibleBid = listing.startingBid
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "comments": comments,
+        # reversed comments and bids so most recent is shown first
+        "comments": reversed(comments),
         "bids": reversed(bids),
         "is_watching": is_watching,
         "lowestPossibleBid": lowestPossibleBid,
-        "bid_error_message": bid_error_message
+        "bid_error_message": bid_error_message,
+        "comment_error_message": comment_error_message
     })
 
 def create(request):
@@ -205,15 +209,12 @@ Enables authenticated users to post a comment
 def new_comment(request, listingID):
     comment_error_message = None
     if request.method == "POST":
-        print(request.POST)
         new_comment = request.POST["new_comment"]
         listing = Listings.objects.get(listingID=listingID)
-        comments = Comments.objects.filter(listingID=listingID)
-
+        checkComments = Comments.objects.filter(listingID=listingID, comment = new_comment)
         # check if the same comment has been made previously to prevent multiple spams of the same comment
-        if new_comment in comments:
+        if checkComments.exists():
             request.session['comment_error_message'] = "New comments cannot be identical to previously entered comments, to prevent spam."
-
         else:
             comment = Comments(listingID=listing, comment=new_comment, commentTime = timezone.now(), userID = request.user)
             comment.save()
