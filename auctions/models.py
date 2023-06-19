@@ -32,7 +32,7 @@ class Listings(models.Model):
     listingActive = models.BooleanField(default = True, null = False, blank = False)
 
     def __str__(self):
-        return f"{self.listingID}: {self.title}"
+        return f"{self.listingID}: {self.title}, listed at {self.listedTime}"
 
 """
 Defines the watchlist table in the DB. It is many to many. 

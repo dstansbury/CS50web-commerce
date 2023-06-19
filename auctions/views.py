@@ -107,7 +107,7 @@ def create(request):
                                 title = request.POST["listingTitle"], 
                                 description = request.POST["listingDescription"],
                                 startingBid = request.POST["listingStartingBid"],
-                                category = request.POST["listingCategory"],
+                                category = request.POST["listingCategory"].title(),
                                 imageURL = request.POST["listingImageURL"],
                                 listedTime = timezone.now()
                                 )
