@@ -95,6 +95,9 @@ def listing(request, listingID):
         "comment_error_message": comment_error_message
     })
 
+"""
+Allows the creation of new listings
+"""
 def create(request):
     if request.method == "GET":
         return render(request, "auctions/create.html")
@@ -105,7 +108,8 @@ def create(request):
                                 description = request.POST["listingDescription"],
                                 startingBid = request.POST["listingStartingBid"],
                                 category = request.POST["listingCategory"],
-                                imageURL = request.POST["listingImageURL"]
+                                imageURL = request.POST["listingImageURL"],
+                                listedTime = timezone.now()
                                 )
         newListing.save()
         return redirect(listing, listingID=newListing.listingID)
@@ -246,9 +250,15 @@ def close_listing(request, listingID):
     if request.method == "POST":
         listing = Listings.objects.get(listingID=listingID)
         listing.listingActive = False
+        
+        # error handles if there have been no bids so far by making the lister push the opening bid
+        if listing.currentPrice == None:
+            bid = Bids(listingID=listing, bidValue=listing.startingBid, bidTime=timezone.now(), bidder=listing.listedBy)
+            bid.save()
+        
         listing.save()
+
         winningBid = Bids.objects.filter(listingID=listingID).order_by('bidValue').last()
         winningBid.isWinningBid = True
         winningBid.save()
-    
     return redirect("listing", listingID=listingID)

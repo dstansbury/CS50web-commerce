@@ -27,9 +27,16 @@
             <p><a href="{% url 'login' %}">Log in</a> to add to watch list</p>
         {% endif %}
         <br>
-        <div>
-            <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
-        </div>
+       <!-- show the image of the listing if there is one -->
+        {% if listing.imageURL == "" %}
+            <div>
+                No image provided
+            </div>
+        {% else %}
+            <div>
+                <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
+            </div>
+        {% endif %} 
         <div>
             <br>
             <p><strong>Starting price</strong>: {{ listing.startingBid }}</p>
@@ -104,10 +111,16 @@
             <p><a href="{% url 'login' %}">Log in</a> to add to watch list</p>
         {% endif %}
         <br>
-        <!-- show the image of the listing -->
-        <div>
-            <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
-        </div>
+        <!-- show the image of the listing if there is one -->
+        {% if listing.imageURL == "" %}
+            <div>
+                No image provided
+            </div>
+        {% else %}
+            <div>
+                <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
+            </div>
+        {% endif %} 
         
         <!-- Show the winning bid on an inactive listing -->
         <div>

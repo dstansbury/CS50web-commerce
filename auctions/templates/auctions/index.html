@@ -16,7 +16,13 @@
         {% for listing in listings %}
             {% if listing.listingActive == True %}
             <tr onclick="window.location= '{% url 'listing' listingID=listing.listingID %}'">
-                <td><img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:200px"></td>
+                <td>
+                    {% if listing.imageURL == "" %}
+                        No image provided
+                    {% else %}
+                        <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:200px">
+                    {% endif %}
+                    </td>
                 <td>{{ listing.title }}</td>
                 <td>{{ listing.description }}</td>
                 <td>{{ listing.startingBid }}</td>
