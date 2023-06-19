@@ -8,18 +8,28 @@
                 <th>Image</th>
                 <th>Title</th>
                 <th>Description</th>
+                <th>Starting Price</th>
                 <th>Current Price</th>
                 <th>Listed By</th>
             </tr>
         </thead>
         {% for listing in listings %}
+            {% if listing.listingActive == True %}
             <tr onclick="window.location= '{% url 'listing' listingID=listing.listingID %}'">
                 <td><img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:200px"></td>
                 <td>{{ listing.title }}</td>
                 <td>{{ listing.description }}</td>
-                <td>{{ listing.currentPrice }}</td>
+                <td>{{ listing.startingBid }}</td>
+                <td>
+                    {% if listing.currentPrice == None %}
+                        No bids
+                    {% else %}
+                        {{ listing.currentPrice }}
+                    {% endif %}
+                </td>
                 <td>{{ listing.listedBy }} </td>
             </tr>
+            {% endif %}
         {% endfor %}
     </table>
 {% endblock %}

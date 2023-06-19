@@ -1,88 +1,156 @@
 {% extends "auctions/layout.html" %}
 
-
 {% block body %}
-    <h2>{{ listing.title }} </h2>
-    <p><strong>Category:</strong><a href="{% url 'listingsInCategory' listing.category %}"> {{ listing.category }} </a>  </p>
-    {% if user.is_authenticated %}
-        {% if not is_watching %}
-            <form method="POST" action="{% url 'add_to_watchlist' %}">
-                {% csrf_token %}
-                <input type="hidden" name="listingID" value="{{ listing.listingID }}">
-                <button class="btn btn-primary" type="submit">Add to watch list</button>
-            </form>
-        {% else %}
-            <form method="POST" action="{% url 'remove_from_watchlist' %}">
-                {% csrf_token %}
-                <input type="hidden" name="listingID" value="{{ listing.listingID }}">
-                <button class="btn btn-secondary"" type="submit">Remove from watch list</button>
-            </form>
-        {% endif %}
-    {% else %}
-        <p><a href="{% url 'login' %}">Log in</a> to add to watch list </p>
-    {% endif %}
-    <br>
-    <div>
-        <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
-    </div>
-    <div>
-        <p><strong>Starting price</strong>: {{ listing.startingBid }} </p>
-        <p><strong>Current high bid</strong>: 
-            {% if listing.currentPrice %}
-                {{ listing.currentPrice }} </p>
+    <!-- ACTIVE LISTING -->
+    {% if listing.listingActive %}
+        
+        <h2>{{ listing.title }}</h2>
+        <p><strong>Category:</strong><a href="{% url 'listingsInCategory' listing.category %}"> {{ listing.category }}</a></p>
+        {% if user.is_authenticated %}
+            
+            {% if not is_watching %}
+                <!-- Add to watchlist -->
+                <form method="POST" action="{% url 'add_to_watchlist' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="listingID" value="{{ listing.listingID }}">
+                    <button class="btn btn-primary" type="submit">Add to watch list</button>
+                </form>
             {% else %}
-                No bids</p>
+                <!-- Remove from watchlist -->
+                <form method="POST" action="{% url 'remove_from_watchlist' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="listingID" value="{{ listing.listingID }}">
+                    <button class="btn btn-secondary" type="submit">Remove from watch list</button>
+                </form>
             {% endif %}
-    </div>
-<!-- hides the ability to bid if the user is not logged in -->
-    {% if user.is_authenticated %}
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to add to watch list</p>
+        {% endif %}
+        <br>
         <div>
-            {% if bid_error_message != None %}
-                <p class="text-danger">{{ bid_error_message }}</p>
-            {% endif %}
-            <form method = "POST" action="{% url 'new_bid' listingID=listing.listingID %}">
-                {% csrf_token %}
-                <input class="form-control" type="number" step="0.01" name="newBid" placeholder="{{ lowestPossibleBid }}">
-                <br>
-                <button class="btn btn-primary" type="submit">Bid</button>
-            </form>
+            <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
         </div>
+        <div>
+            <br>
+            <p><strong>Starting price</strong>: {{ listing.startingBid }}</p>
+            <p><strong>Current high bid</strong>: 
+                {% if listing.currentPrice %}
+                    {{ listing.currentPrice }}
+                {% else %}
+                    No bids
+                {% endif %}
+            </p>
+        </div>
+        <!-- hides the ability to bid if the user is not logged in -->
+        {% if user.is_authenticated %}
+            <div>
+                {% if bid_error_message != None %}
+                    <p class="text-danger">{{ bid_error_message }}</p>
+                {% endif %}
+                <form method="POST" action="{% url 'new_bid' listingID=listing.listingID %}">
+                    {% csrf_token %}
+                    <input class="form-control" type="number" step="0.01" name="newBid" placeholder="{{ lowestPossibleBid }}">
+                    <br>
+                    <button class="btn btn-primary" type="submit">Bid</button>
+                </form>
+            </div>
+        {% endif %}
+        <br>
+        <!-- if the logged in user listed the item, show a close listing button -->
+        {% if listing.listedBy == user %}
+            <form method="POST" action="{% url 'close_listing' listingID=listing.listingID %}">
+                {% csrf_token %}
+                <input type="hidden" name="listingID" value="{{ listing.listingID }}">
+                <button class="btn btn-danger" type="submit">Close listing</button>
+            </form>
+            <br>
+        {% endif %}
+
+    <!-- INACTIVE LISTING -->
+    {% else %}
+        <h2>{{ listing.title }}</h2>
+        <p><strong>Category:</strong><a href="{% url 'listingsInCategory' listing.category %}"> {{ listing.category }}</a></p>
+        
+        <!-- If the user who won the auction, show a you won alert -->
+        {% if winningBid.bidder == user %}
+            <div class="alert alert-warning" role="alert">
+                Congratulations! You won this auction.
+            </div>
+        
+        <!-- If not the user who won the auction, show a listing no longer active alert -->
+        {% else %} 
+            <div class="alert alert-danger" role="alert">
+                Listing is no longer active.
+            </div>
+        {% endif %}
+            
+        {% if user.is_authenticated %}
+            {% if not is_watching %}
+                <!-- Add to watchlist -->
+                <form method="POST" action="{% url 'add_to_watchlist' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="listingID" value="{{ listing.listingID }}">
+                    <button class="btn btn-primary" type="submit">Add to watch list</button>
+                </form>
+            {% else %}
+                <!-- Remove from watchlist -->
+                <form method="POST" action="{% url 'remove_from_watchlist' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="listingID" value="{{ listing.listingID }}">
+                    <button class="btn btn-secondary" type="submit">Remove from watch list</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to add to watch list</p>
+        {% endif %}
+        <br>
+        <!-- show the image of the listing -->
+        <div>
+            <img src="{{ listing.imageURL }}" alt="Image of {{ listing.title }}" style="max-width:500px">
+        </div>
+        
+        <!-- Show the winning bid on an inactive listing -->
+        <div>
+            <br>
+            <p><strong>Winning bid</strong>: {{ listing.currentPrice }}</p>
+        </div>
+        
     {% endif %}
-    <br>
+
+    <!-- ALL LISTINGS -->
+
+    <!-- Displays detail of the listing -->
     <div>
-<!-- Displays detail of the listing -->
         <h3>Details</h3>
         <p>{{ listing.description }}</p>
-        <p><strong>Listed by:</strong>  {{ listing.listedBy }} on {{ listing.listedTime }} </p>
-        
+        <p><strong>Listed by:</strong> {{ listing.listedBy }} on {{ listing.listedTime }}</p>
     </div>
     <div>
         <h3>Bid History</h3>
         {% if bids %}
-        <table class = "table table-hover table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>User</th>
-                    <th>Bid</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            {% for bid in bids %}
-                <tr>
-                    <td>{{ bid.bidder }} </td>
-                    <td>{{ bid.bidValue }}</td>
-                    <td>{{ bid.bidTime }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-            
+            <table class="table table-hover table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>User</th>
+                        <th>Bid</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                {% for bid in bids %}
+                    <tr>
+                        <td>{{ bid.bidder }}</td>
+                        <td>{{ bid.bidValue }}</td>
+                        <td>{{ bid.bidTime }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
         {% else %}
             <p>No bids</p>
         {% endif %}
     </div>
     <div>
         <h3>Comments</h3>
-        <table class = "table table-hover table-bordered">
+        <table class="table table-hover table-bordered">
             <thead class="thead-dark">
                 <tr>
                     <th>User</th>
@@ -92,27 +160,25 @@
             </thead>
             {% for comment in comments %}
                 <tr>
-                    <td>{{ comment.userID }} </td>
+                    <td>{{ comment.userID }}</td>
                     <td>{{ comment.comment }}</td>
                     <td>{{ comment.commentTime }}</td>
                 </tr>
             {% endfor %}
         </table>
-    <!-- hides the ability to comment if the user is not logged in -->
-    {% if user.is_authenticated %}
-    <div>
-        {% if comment_error_message != None %}
-            <p class="text-danger">{{ comment_error_message }}</p>
+        <!-- hides the ability to comment if the user is not logged in -->
+        {% if user.is_authenticated %}
+            <div>
+                {% if comment_error_message != None %}
+                    <p class="text-danger">{{ comment_error_message }}</p>
+                {% endif %}
+                <form method="POST" action="{% url 'new_comment' listingID=listing.listingID %}">
+                    {% csrf_token %}
+                    <input class="form-control" type="text" name="new_comment" placeholder="Enter your comment here">
+                    <br>
+                    <button class="btn btn-primary" type="submit">Add Comment</button>
+                </form>
+            </div>
         {% endif %}
-        <form method = "POST" action="{% url 'new_comment' listingID=listing.listingID %}">
-            {% csrf_token %}
-            <input class="form-control" type="text" name="new_comment" placeholder="Enter your comment here">
-            <br>
-            <button class="btn btn-primary" type="submit">Add Comment</button>
-        </form>
     </div>
-{% endif %}
-    </div>
-
-    
 {% endblock %}

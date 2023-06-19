@@ -71,6 +71,8 @@ def listing(request, listingID):
     listing = Listings.objects.get(listingID=listingID)
     comments = Comments.objects.filter(listingID=listingID)
     bids = Bids.objects.filter(listingID=listingID)
+    print(bids)
+    winningBid = bids.filter(isWinningBid = True).first()
     is_watching = UserWatchList.objects.filter(userID=request.user, listingID=listing).exists() if request.user.is_authenticated else False
     #pops the bid_error_message off, so it is only shown on the relevant request, once.
     bid_error_message = request.session.pop("bid_error_message", None)
@@ -86,6 +88,7 @@ def listing(request, listingID):
         # reversed comments and bids so most recent is shown first
         "comments": reversed(comments),
         "bids": reversed(bids),
+        "winningBid": winningBid,
         "is_watching": is_watching,
         "lowestPossibleBid": lowestPossibleBid,
         "bid_error_message": bid_error_message,
@@ -220,3 +223,18 @@ def new_comment(request, listingID):
             comment.save()
         
     return redirect("listing", listingID = listingID)
+
+
+"""
+Enables users to close auctions that they listed
+"""
+def close_listing(request, listingID):
+    if request.method == "POST":
+        listing = Listings.objects.get(listingID=listingID)
+        listing.listingActive = False
+        listing.save()
+        winningBid = Bids.objects.filter(listingID=listingID).order_by('bidValue').last()
+        winningBid.isWinningBid = True
+        winningBid.save()
+    
+    return redirect("listing", listingID=listingID)
