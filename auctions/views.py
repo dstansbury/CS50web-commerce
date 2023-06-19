@@ -96,7 +96,21 @@ def listing(request, listingID):
     })
 
 def create(request):
-    return render(request, "auctions/create.html")
+    if request.method == "GET":
+        return render(request, "auctions/create.html")
+
+    else:
+        newListing = Listings.objects.create(listedBy=request.user,
+                                title = request.POST["listingTitle"], 
+                                description = request.POST["listingDescription"],
+                                startingBid = request.POST["listingStartingBid"],
+                                category = request.POST["listingCategory"],
+                                imageURL = request.POST["listingImageURL"]
+                                )
+        newListing.save()
+        return redirect(listing, listingID=newListing.listingID)
+        
+
 
 """
 Only accessible if the user is logged in.
